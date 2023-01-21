@@ -77,8 +77,7 @@ Resources:
       MinSize: 1 # Required
       TargetGroupARNs:
         - !Ref yakupTG
-      VPCZoneIdentifier:
-        - !Ref SubnetParameter
+      VPCZoneIdentifier: !Ref SubnetParameter
 
 
   AutoScalingPolicy:
