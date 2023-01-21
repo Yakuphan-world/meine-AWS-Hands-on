@@ -1,26 +1,111 @@
 AWSTemplateFormatVersion: 2010-09-09
+
+
 Description: |
-  
+  This template creates an ASG behind an ALB.
+
+
 Parameters:
+  VPCParameter:
+    Description: Select your VPC.
+    Type: AWS::EC2::VPC::Id
+
+  SubnetParameter:
+    Description: Select at least 2 subnets.
+    Type: List<AWS::EC2::Subnet::Id>
+
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+
+  KeyPairParameter:
+    Description: Select your Key Pair.
+    Type: AWS::EC2::KeyPair::KeyName
   
-Metadata:
   
 Mappings:
+  RegionImageMap:
+    us-east-1:
+      AMI: ami-0b5eea76982371e91
+    us-east-2:
+      AMI: ami-0233c2d874b811deb
+    us-west-1:
+      AMI: ami-0ed05376b59b90e46
+    us-west-2:
+      AMI: ami-0dc8f589abe99f538
+    eu-west-1:
+      AMI: ami-058b1b7fe545997ae
   
-Conditions:
+
   
 Resources:
+  yakupALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      SecurityGroups:
+        - !GetAtt yakupSG.GroupId
+      Subnets: !Ref SubnetParameter 
+      Type: application
+
+  yakupListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions: # Required
+        - Type: forward
+          TargetGroupArn: !Ref yakupTG
+      LoadBalancerArn: !Ref yakupALB # Required
+      Port: 80
+      Protocol: HTTP
+
+
+
+  yakupASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: 2
+      HealthCheckGracePeriod: 100
+      HealthCheckType: ELB
+      LaunchTemplate:
+        LaunchTemplateId: !Ref yakupLT
+        Version: 1
+      MaxSize: 3 # Required
+      MinSize: 1 # Required
+      TargetGroupARNs:
+        - !Ref yakupTG
+      VPCZoneIdentifier:
+        - !Ref SubnetParameter
+
+
+  AutoScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref yakupASG
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 60.0
+
+
+
   yakupLT:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateData:
-        ImageId: ami-0b5eea76982371e91
-        InstanceType: t2.micro
-        KeyName: yeni
+        ImageId: !FindInMap 
+          - RegionImageMap
+          - !Ref AWS::Region
+          - AMI
+        InstanceType: !Ref InstanceTypeParameter
+        KeyName: !Ref KeyPairParameter
         SecurityGroupIds:
-          -
-        SecurityGroups:
-          - !Ref yakupSG
+          - !GetAtt yakupSG.GroupId
         UserData: !Base64 |
           #! /bin/bash
           yum update -y
@@ -44,7 +129,6 @@ Resources:
           </html>" > /var/www/html/index.html
           systemctl start httpd
           systemctl enable httpd         
-          
 
 
 
@@ -57,7 +141,7 @@ Resources:
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2
-      VpcId: "String"
+      VpcId: !Ref VPCParameter
   
   yakupSG:
     Type: AWS::EC2::SecurityGroup
@@ -72,8 +156,12 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-      VpcId: "String" # Später machen wir 
-  
-Transform:
-  
+      VpcId: !Ref VPCParameter
+
 Outputs:
+  DNSofALB:
+    Description: The DNSName of ALB.
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt yakupALB.DNSName
