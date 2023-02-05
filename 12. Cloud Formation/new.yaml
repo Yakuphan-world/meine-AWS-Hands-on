@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Here are some details about the template.
+Parameters:
+  SecerutiyGrupName:
+    Description: 
+    Type: List<AWS::EC2::SecurityGroup::GroupName>
+    Default: 
+  AvailabilityZone:
+    Description: 
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-west-2a
+    AllowedValues:
+      - us-east-1a
+      - us-east-1b
+      - us-east-1c
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+  
+Metadata:
+  
+Mappings:
+  
+Conditions:
+  
+Resources:
+  LogicalID:
+    Type: AWS::EC2::Instance
+    Properties:
+      AdditionalInfo: "String"
+      Affinity: "String"
+      AvailabilityZone: "String"
+      BlockDeviceMappings:
+        BlockDeviceMappings
+      CpuOptions:
+        CoreCount: Number
+        ThreadsPerCore: Number
+      CreditSpecification:
+        CPUCredits: "Number"
+      DisableApiTermination: false
+      EbsOptimized: false
+      ElasticGpuSpecifications:
+        ElasticGpuSpecifications
+      ElasticInferenceAccelerators:
+        ElasticInferenceAccelerators
+      EnclaveOptions:
+        Enabled: false
+      HibernationOptions:
+        Configured: false
+      HostId: "String"
+      HostResourceGroupArn: "String"
+      IamInstanceProfile: "String"
+      ImageId: "String"
+      InstanceInitiatedShutdownBehavior: "String"
+      InstanceType: "String"
+      Ipv6AddressCount: Number
+      Ipv6Addresses:
+        Ipv6Addresses
+      KernelId: "String"
+      KeyName: "String"
+      LaunchTemplate:
+        LaunchTemplateId: "String"
+        LaunchTemplateName: "String"
+        Version: "String"
+      LicenseSpecifications:
+        LicenseSpecifications
+      Monitoring: String
+      NetworkInterfaces:
+        NetworkInterfaces
+      PlacementGroupName: "String"
+      PrivateDnsNameOptions:
+        EnableResourceNameDnsAAAARecord: false
+        EnableResourceNameDnsARecord: false
+        HostnameType: "String"
+      PrivateIpAddress: "false"
+      PropagateTagsToVolumeOnCreation: String
+      RamdiskId: "String"
+      SecurityGroupIds:
+        SecurityGroupIds
+      SecurityGroups:
+        SecurityGroups
+      SourceDestCheck: false
+      SsmAssociations:
+        SsmAssociations
+      SubnetId: "String"
+      Tags:
+        Tags
+      Tenancy: "String"
+      UserData: "String"
+      Volumes:
+        Volumes
+  LogicalID:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "String" # Required
+      GroupName: "String"
+      SecurityGroupEgress:
+        SecurityGroupEgress
+      SecurityGroupIngress:
+        
+      Tags:
+        Tags
+      VpcId: "String"
+Transform:
+  
+Outputs:
